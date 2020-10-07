@@ -287,3 +287,8 @@ ul.checked-list-box input[type="checkbox"] {
   background-color: lightblue;
   filter: blur(4px);
 }
+/* Course tiles */
+.card-trunc {
+  overflow: hidden;
+  max-height: 200px;
+}
