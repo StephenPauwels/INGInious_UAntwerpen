@@ -200,7 +200,8 @@ def get_app(config):
                                                                    DisplayableCodeSingleLineProblem,
                                                                    DisplayableFileProblem,
                                                                    DisplayableMultipleChoiceProblem,
-                                                                   DisplayableMatchProblem]
+                                                                   DisplayableMatchProblem,
+                                                                   DisplayableTestProblem]
     }
 
     course_factory, task_factory = create_factories(fs_provider, default_problem_types, plugin_manager)
