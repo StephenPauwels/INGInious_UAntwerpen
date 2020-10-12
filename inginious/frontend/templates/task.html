@@ -49,6 +49,8 @@ $def ColumnF():
                         $:_("Not yet attempted")
                     $elif eval_submission is not None and eval_submission["status"] == "done" and eval_submission["result"] == "success":
                         $:_("Succeeded")
+                    $elif eval_submission is not None and eval_submission["status"] == "done" and eval_submission["result"] == "open":
+                        $:_("Open")
                     $else:
                         $ waiting=False
                         $for submission in submissions:
