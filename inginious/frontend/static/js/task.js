@@ -644,6 +644,10 @@ function load_feedback_multiple_choice(key, content) {
     load_feedback_code(key, content);
 }
 
+function load_feedback_extra_test(key, content) {
+    load_feedback_code(key, content);
+}
+
 //Create an alert
 //type is either alert, info, danger, warning
 //dismissible is a boolean
