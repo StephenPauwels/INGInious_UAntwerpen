@@ -838,6 +838,11 @@ function load_input_match(submissionid, key, input) {
         $(field).prop('value', "");
 }
 
+function load_input_extra_test(submissionid, key, input) {
+    var field = $(".problem input[name='" + key + "']");
+    console.log(field);
+}
+
 // Share eval submission result on social networks
 function share_submission(method_id)
 {
