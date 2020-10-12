@@ -406,7 +406,7 @@ class TestProblem(Problem):
         return "extra_test"
 
     def input_is_consistent(self, task_input, default_allowed_extension, default_max_size):
-        return self.get_id() in task_input
+        return True
 
     def input_type(self):
         return None

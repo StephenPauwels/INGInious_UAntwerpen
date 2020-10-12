@@ -296,6 +296,7 @@ function taskFormValid()
         $.each(allowed_extensions, function(idx, ext){
             has_one = has_one || (filename.lastIndexOf(ext) === filename.length - ext.length) > 0;
         });
+
         if(!has_one)
             errors.push($("#invalidext").text().replace("{}", filename));
 
