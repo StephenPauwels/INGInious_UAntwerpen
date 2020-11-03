@@ -45,50 +45,6 @@ class BaseTaskPage(object):
             raise web.notfound(str(ex))
         return course.get_accessibility().is_open() and course.allow_preview()
 
-    def set_selected_submission(self, course, task, submissionid):
-        """ Set submission whose id is `submissionid` to selected grading submission for the given course/task.
-            Returns a boolean indicating whether the operation was successful or not.
-        """
-
-        submission = self.submission_manager.get_submission(submissionid)
-
-        # Do not continue if submission does not exist or is not owned by current user
-        if not submission:
-            return False
-
-        # Check if the submission if from this task/course!
-        if submission["taskid"] != task.get_id() or submission["courseid"] != course.get_id():
-            return False
-
-        is_staff = self.user_manager.has_staff_rights_on_course(course, self.user_manager.session_username())
-
-        # Do not enable submission selection after deadline
-        if not task.get_accessible_time().is_open() and not is_staff:
-            return False
-
-        # Only allow to set submission if the student must choose their best submission themselves
-        if task.get_evaluate() != 'student' and not is_staff:
-            return False
-
-        # Check if task is done per group
-        if task.is_group_task() and not is_staff:
-            group = self.database.groups.find_one({"courseid": task.get_course_id(),
-                                                 "students": self.user_manager.session_username()})
-            students = group["students"]
-        else:
-            students = [self.user_manager.session_username()]
-
-        # Check if group/group is the same
-        if students == submission["username"]:
-            self.database.user_tasks.update_many(
-                {"courseid": task.get_course_id(), "taskid": task.get_id(), "username": {"$in": students}},
-                {"$set": {"submissionid": submission['_id'],
-                          "grade": submission['grade'],
-                          "succeeded": submission["result"] == "success"}})
-            return True
-        else:
-            return False
-
     def GET(self, courseid, taskid, is_LTI):
         """ GET request """
         username = self.user_manager.session_username()
@@ -130,7 +86,7 @@ class BaseTaskPage(object):
             # Download a previously submitted file
             submission = self.submission_manager.get_submission(userinput["submissionid"], user_check=not is_staff)
             if submission is None:
-                raise web.notfound()
+                raise self.cp.app.notfound(message=_("Submission doesn't exist."))
             sinput = self.submission_manager.get_input_from_submission(submission, True)
             if userinput["questionid"] not in sinput:
                 raise web.notfound()
@@ -273,7 +229,7 @@ class BaseTaskPage(object):
             submission = self.submission_manager.get_input_from_submission(submission)
             submission = self.submission_manager.get_feedback_from_submission(submission, show_everything=is_staff)
             if not submission:
-                raise web.notfound()
+                raise self.cp.app.notfound(message=_("Submission doesn't exist."))
             web.header('Content-Type', 'application/json')
 
             return self.submission_to_json(task, submission, is_admin, True, tags=course.get_tags())
@@ -282,15 +238,6 @@ class BaseTaskPage(object):
             self.submission_manager.kill_running_submission(userinput["submissionid"])  # ignore return value
             web.header('Content-Type', 'application/json')
             return json.dumps({'status': 'done'})
-        elif "@action" in userinput and userinput["@action"] == "set_submission" and "submissionid" in userinput:
-            web.header('Content-Type', 'application/json')
-            if task.get_evaluate() != 'student':
-                return json.dumps({'status': "error"})
-
-            if self.set_selected_submission(course, task, userinput["submissionid"]):
-                return json.dumps({'status': 'done'})
-            else:
-                return json.dumps({'status': 'error'})
         else:
             raise web.notfound()
 

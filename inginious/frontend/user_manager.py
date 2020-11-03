@@ -381,7 +381,7 @@ class UserManager:
 
         auth_method = self.get_auth_method(auth_id)
         if not auth_method:
-            raise web.notfound()
+            raise web.notfound(message=_("Auth method not found."))
 
         # Look for already bound auth method username
         user_profile = self._database.users.find_one({"bindings." + auth_id: username})
@@ -560,7 +560,6 @@ class UserManager:
 
             # Check if the submission is the default download
             set_default = task.get_evaluate() == 'last' or \
-                          (task.get_evaluate() == 'student' and old_submission is None) or \
                           (task.get_evaluate() == 'best' and old_submission.get('grade', 0.0) <= grade)
 
             if set_default:
