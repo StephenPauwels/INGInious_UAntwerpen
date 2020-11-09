@@ -27,6 +27,9 @@
     <!-- Codemirror Style -->
     <link href="{{get_homepath(True)}}/static/css/codemirror.css" rel="stylesheet">
 
+    <!-- selectize -->
+    <link href="{{get_homepath(True)}}/static/css/selectize.css" rel="stylesheet">
+
     <!-- Icons -->
     <link rel="shortcut icon" href="{{get_homepath(True)}}/static/icons/favicon.ico">
     <link rel="apple-touch-icon" sizes="57x57" href="{{get_homepath(True)}}/static/icons/apple-touch-icon-57x57.png">
@@ -74,6 +77,7 @@
     <script src="{{get_homepath(True)}}/static/js/libs/bootstrap-datetimepicker.min.js" type="text/javascript" charset="utf-8"></script>
     <script src='{{get_homepath(True)}}/static/js/libs/Sortable.min.js' type="text/javascript" charset="utf-8"></script>
     <script src="{{get_homepath(True)}}/static/js/libs/jquery.twbsPagination.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="{{get_homepath(True)}}/static/js/libs/selectize.js" type="text/javascript" charset="utf-8"></script>
     <script src="{{get_homepath(True)}}/static/js/checked-list-group.js" type="text/javascript" charset="utf-8"></script>
     <script src="{{get_homepath(True)}}/static/js/common.js" type="text/javascript" charset="utf-8"></script>
     <script src="{{get_homepath(True)}}/static/js/task.js" type="text/javascript" charset="utf-8"></script>
@@ -88,9 +92,9 @@
         CodeMirror.modeURL = "{{get_homepath(True)}}/static/js/codemirror/mode/%N/%N.js";
     </script>
 
-    {{ template_helper.call('css') }}
-    {{ template_helper.call('javascript_header') }}
-    {{ template_helper.call('header_hook') }}
+    {{ template_helper.call('css') | safe }}
+    {{ template_helper.call('javascript_header') | safe }}
+    {{ template_helper.call('header_hook') | safe }}
     {% endblock %}
 </head>
 
@@ -184,6 +188,6 @@
 
     <!-- Placed at the end of the document so the pages load faster -->
     <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    {{ template_helper.call('javascript_footer') }}
+    {{ template_helper.call('javascript_footer') | safe }}
 </body>
 </html>
