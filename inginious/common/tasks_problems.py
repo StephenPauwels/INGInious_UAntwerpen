@@ -157,6 +157,7 @@ class FileProblem(Problem):
         self._header = content['header'] if "header" in content else ""
         self._max_size = content.get("max_size", None)
         self._allowed_exts = content.get("allowed_exts", None)
+        self._optional = content.get("optional", False)
 
     def input_type(self):
         return dict
@@ -186,8 +187,11 @@ class FileProblem(Problem):
 
     def input_is_consistent(self, task_input, default_allowed_extension, default_max_size):
         if not str(self.get_id()) in task_input:
-            return False
+                return False
         try:
+            if len(task_input[self.get_id()]) == 0 and self._optional:
+                return True
+
             if not task_input[self.get_id()]["filename"].endswith(tuple(self._allowed_exts or default_allowed_extension)):
                 return False
 
