@@ -451,6 +451,8 @@ function studio_init_template_file(well, pid, problem)
         $('#maxsize-' + pid, well).val(problem["max_size"]);
     if("allowed_exts" in problem)
         $('#extensions-' + pid, well).val(problem["allowed_exts"].join());
+    if("optional" in problem && problem["optional"])
+        $('#optional-' + pid, well).attr('checked', true);
 }
 
 /**
