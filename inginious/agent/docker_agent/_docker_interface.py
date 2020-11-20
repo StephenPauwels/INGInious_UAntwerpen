@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 import docker
 import logging
+import sys
 
 DOCKER_AGENT_VERSION = 2
 
@@ -20,6 +21,22 @@ class DockerInterface(object):  # pragma: no cover
         We do not test coverage here, as it is a bit complicated to interact with docker in tests.
         Docker-py itself is already well tested.
     """
+
+    def __init__(self, type, runtime):
+        """
+        :param type: type of the container ("docker" or "kata")
+        :param runtime: runtime used by docker (for example, "runc" with docker or "kata-qemu" with kata)
+        """
+        runtimes = {
+            "docker": ["runc", "crun"],
+            "kata": ["kata-qemu", "kata-fc"]
+        }
+        if type in runtimes and runtime in runtimes[type]:
+            self.type = type
+            self.runtime = runtime
+        else:
+            logging.getLogger("inginious.agent").exception("Type of agent %s does not support runtime %s", type, runtime)
+            sys.exit("Bad runtime")
 
     @property
     def _docker(self):
@@ -44,17 +61,19 @@ class DockerInterface(object):  # pragma: no cover
             try:
                 title = x.labels["org.inginious.grading.name"]
 
-                if x.labels.get("org.inginious.grading.agent_version") != str(DOCKER_AGENT_VERSION):
-                    logging.getLogger("inginious.agent").warning(
-                        "Container %s is made for an old/newer version of the docker agent (container version is %s, "
-                        "but it should be %i). INGInious will ignore the container.", title,
-                        str(x.labels.get("org.inginious.grading.agent_version")), DOCKER_AGENT_VERSION)
-                    continue
+                if self.type != "docker" or "org.inginious.grading.need_root" not in x.labels:
+                    logging.getLogger("inginious.agent").info("%s contains: %s", self.type, title)
+                    if x.labels.get("org.inginious.grading.agent_version") != str(DOCKER_AGENT_VERSION):
+                        logging.getLogger("inginious.agent").warning(
+                            "Container %s is made for an old/newer version of the %s agent (container version is %s, "
+                            "but it should be %i). INGInious will ignore the container.", title, self.type,
+                            str(x.labels.get("org.inginious.grading.agent_version")), DOCKER_AGENT_VERSION)
+                        continue
 
-                created = datetime.strptime(x.attrs['Created'][:-4], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
-                ports = [int(y) for y in x.labels["org.inginious.grading.ports"].split(
-                    ",")] if "org.inginious.grading.ports" in x.labels else []
-                images[x.attrs['Id']] = {"title": title, "created": created, "ports": ports}
+                    created = datetime.strptime(x.attrs['Created'][:-4], "%Y-%m-%dT%H:%M:%S.%f").timestamp()
+                    ports = [int(y) for y in x.labels["org.inginious.grading.ports"].split(
+                        ",")] if "org.inginious.grading.ports" in x.labels else []
+                    images[x.attrs['Id']] = {"title": title, "created": created, "ports": ports}
             except:
                 logging.getLogger("inginious.agent").exception("Container %s is badly formatted", title or "[cannot load title]")
 
@@ -114,7 +133,8 @@ class DockerInterface(object):  # pragma: no cover
                 sockets_path: {'bind': '/sockets'},
                 course_common_path: {'bind': '/course/common', 'mode': 'ro'},
                 course_common_student_path: {'bind': '/course/common/student', 'mode': 'ro'}
-            }
+            },
+            runtime=self.runtime
         )
         return response.id
 
@@ -135,7 +155,6 @@ class DockerInterface(object):  # pragma: no cover
         socket_path = os.path.abspath(socket_path)
         systemfiles_path = os.path.abspath(systemfiles_path)
         course_common_student_path = os.path.abspath(course_common_student_path)
-
         response = self._docker.containers.create(
             environment,
             stdin_open=True,
@@ -150,7 +169,8 @@ class DockerInterface(object):  # pragma: no cover
                  socket_path: {'bind': '/__parent.sock'},
                  systemfiles_path: {'bind': '/task/systemfiles', 'mode': 'ro'},
                  course_common_student_path: {'bind': '/course/common/student', 'mode': 'ro'}
-            }
+            },
+            runtime=self.runtime
         )
         return response.id
 
