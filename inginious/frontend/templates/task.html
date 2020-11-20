@@ -369,40 +369,40 @@ $else:
             </div>
         </div>
 
-    $# no need to check with lti=True/False here as it was already checked by the calling python script.
-    $ groups_ok = user_manager.task_can_user_submit(task, user_manager.session_username(), 'groups')
-    $ tokens_ok = user_manager.task_can_user_submit(task, user_manager.session_username(), 'tokens')
+        $# no need to check with lti=True/False here as it was already checked by the calling python script.
+        $ groups_ok = user_manager.task_can_user_submit(task, user_manager.session_username(), 'groups')
+        $ tokens_ok = user_manager.task_can_user_submit(task, user_manager.session_username(), 'tokens')
 
-    $if not registered:
-        <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("Please enroll in the course to submit.")</button>
-    $elif groups_ok and tokens_ok:
-        $if user_manager.has_admin_rights_on_course(course):
-            <input type="hidden" name="@debug-mode" id="task-debug-mode" value=""/>
-            <div class="row">
-                <div class="col-xs-9 col-md-10">
-                    <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">$:_("Submit")</button>
+        $if not registered:
+            <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("Please enroll in the course to submit.")</button>
+        $elif groups_ok and tokens_ok:
+            $if user_manager.has_admin_rights_on_course(course):
+                <input type="hidden" name="@debug-mode" id="task-debug-mode" value=""/>
+                <div class="row task_submit">
+                    <div class="col-xs-9 col-md-10">
+                        <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">$:_("Submit")</button>
+                    </div>
+                    <div class="col-xs-3 col-md-2">
+                        <button type="button" class="btn btn-info btn-lg btn-block center-block" id="task-submit-debug" data-toggle="tooltip"
+                                data-placement="top" title=$:_('"Start remote SSH console with this input"')>
+                            <i class="fa fa-terminal"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-xs-3 col-md-2">
-                    <button type="button" class="btn btn-info btn-lg btn-block center-block" id="task-submit-debug" data-toggle="tooltip"
-                            data-placement="top" title=$:_('"Start remote SSH console with this input"')>
-                        <i class="fa fa-terminal"></i>
-                    </button>
-                </div>
-            </div>
+            $else:
+                <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">$:_("Submit")</button>
+        $elif not task.get_accessible_time().is_open():
+            <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("The deadline is over, you cannot submit anymore")</button>
+        $elif task.is_group_task() and not groups_ok:
+            <button class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$(_('Please register in a group'))</button>
+        $elif not tokens_ok:
+            <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">
+                $(_('You have reached the submission limit.') if not task.is_group_task() else _('Your group have reached the submission limit.'))
+            $if task.get_submission_limit()["period"] > 0:
+                <br/> $:_("It will be refilled within the next {} hour(s)").format(task.get_submission_limit()["period"])
+            </button>
         $else:
-            <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">$:_("Submit")</button>
-    $elif not task.get_accessible_time().is_open():
-        <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("The deadline is over, you cannot submit anymore")</button>
-    $elif task.is_group_task() and not groups_ok:
-        <button class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$(_('Please register in a group'))</button>
-    $elif not tokens_ok:
-        <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">
-            $(_('You have reached the submission limit.') if not task.is_group_task() else _('Your group have reached the submission limit.'))
-        $if task.get_submission_limit()["period"] > 0:
-            <br/> $:_("It will be refilled within the next {} hour(s)").format(task.get_submission_limit()["period"])
-        </button>
-    $else:
-        <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("You are not allowed to submit")</button>
+            <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("You are not allowed to submit")</button>
 </form>
 
 <!-- Modals -->
