@@ -146,8 +146,8 @@ class Client(BetterParanoidPirateClient):
 
     async def _ask_queue_update(self):
         """ Send a ClientGetQueue message to the backend, if one is not already sent """
-        try:
-            while True:
+        while True:
+            try:
                 await asyncio.sleep(self._queue_update_timer)
                 if self._queue_update_last_attempt == 0 or self._queue_update_last_attempt > self._queue_update_last_attempt_max:
                     if self._queue_update_last_attempt:
@@ -159,10 +159,11 @@ class Client(BetterParanoidPirateClient):
                     await self._simple_send(ClientGetQueue())
                 else:
                     self._logger.error("Not asking for a job queue update as previous update not yet received")
-        except asyncio.CancelledError:
-            return
-        except KeyboardInterrupt:
-            return
+                    self._queue_update_last_attempt += 1
+            except (asyncio.CancelledError, KeyboardInterrupt):
+                return
+            except:
+                self._logger.exception("Exception in Client._ask_queue_update")
 
     async def _handle_job_queue_update(self, message: BackendGetQueue):
         """ Handles a BackendGetQueue containing a snapshot of the job queue """
@@ -173,19 +174,17 @@ class Client(BetterParanoidPirateClient):
         # Do some precomputation
         new_job_queue_cache = {}
         # format is job_id: (nb_jobs_before, max_remaining_time)
-        for (job_id, is_local, _, _2, _3, start_time, max_time) in message.jobs_running:
-            if is_local:
-                remaining = 0
-                if max_time > 0:
-                    remaining = max(0, (start_time + max_time) - time.time())
-                new_job_queue_cache[job_id] = (-1, remaining)
+        for (job_id, _, _2, _3, _4, start_time, max_time) in message.jobs_running:
+            remaining = 0
+            if max_time > 0:
+                remaining = max(0, (start_time + max_time) - time.time())
+            new_job_queue_cache[job_id] = (-1, remaining)
         wait_time = 0
         nb_tasks = 0
-        for (job_id, is_local, _, _2, timeout) in message.jobs_waiting:
+        for (job_id, _, _2, _3, timeout) in message.jobs_waiting:
             if timeout > 0:
                 wait_time += timeout
-            if is_local:
-                new_job_queue_cache[job_id] = (nb_tasks, wait_time)
+            new_job_queue_cache[job_id] = (nb_tasks, wait_time)
             nb_tasks += 1
 
         self._queue_job_cache = new_job_queue_cache

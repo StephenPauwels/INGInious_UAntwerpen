@@ -154,7 +154,16 @@ class CookieLessCompatibleApplication(web.application):
             return web.ctx.homepath
 
 
-class CookieLessCompatibleSession(object):
+class AvoidCreatingSession(Exception):
+    """
+        allow specific pages (such as SAML auth) to avoid creating a new session.
+        this is particularly useful when received cross-site POST request, to which the cookies are not sent...
+    """
+    def __init__(self, elem):
+        self.elem = elem
+
+
+class CookieLessCompatibleSession:
     """ A session that can either store its session id in a Cookie or directly in the webpage URL.
         The load(session_id) function must be called manually, in order for the session to be loaded.
         This is usually done by the CookieLessCompatibleApplication.
@@ -163,7 +172,7 @@ class CookieLessCompatibleSession(object):
     """
 
     __slots__ = [
-        "store", "_initializer", "_last_cleanup_time", "_config", "_data", "_session_id_regex",
+        "store", "_initializer", "_last_cleanup_time", "_config", "_data", "_origdata", "_session_id_regex",
         "__getitem__", "__setitem__", "__delitem__"
     ]
 
@@ -173,6 +182,7 @@ class CookieLessCompatibleSession(object):
         self._last_cleanup_time = 0
         self._config = utils.storage(web.config.session_parameters)
         self._data = utils.threadeddict()
+        self._origdata = utils.threadeddict()
         self._session_id_regex = utils.re_compile('^[0-9a-fA-F]+$')
 
         self.__getitem__ = self._data.__getitem__
@@ -202,10 +212,23 @@ class CookieLessCompatibleSession(object):
 
         self._cleanup()
 
+        avoid_save = False
         try:
-            return handler()
+            x = handler()
+            if isinstance(x, AvoidCreatingSession):
+                avoid_save = True
+                return x.elem
+            return x
+        except web.HTTPError as x:
+            if isinstance(x.data, AvoidCreatingSession):
+                avoid_save = True
+                x.data = x.data.elem
+                raise x from x
+            raise
         finally:
-            self.save()
+            if not avoid_save:
+                self.save()
+            self._data.clear()
 
     def load(self, session_id=None):
         """ Load the session from the store.
@@ -215,16 +238,18 @@ class CookieLessCompatibleSession(object):
         - a string which is the session_id to be used.
         """
 
+        cookieless = False
+
         if session_id is None:
             cookie_name = self._config.cookie_name
             self._data["session_id"] = web.cookies().get(cookie_name)
-            self._data["cookieless"] = False
+            cookieless = False
         else:
             if session_id == '':
                 self._data["session_id"] = None  # will be created
             else:
                 self._data["session_id"] = session_id
-            self._data["cookieless"] = True
+            cookieless = True
 
         # protection against session_id tampering
         if self._data["session_id"] and not self._valid_session_id(self._data["session_id"]):
@@ -233,10 +258,11 @@ class CookieLessCompatibleSession(object):
         self._check_expiry()
         if self._data["session_id"]:
             d = self.store[self._data["session_id"]]
-            self.update(d)
+            self._data.update(d)
             self._validate_ip()
 
         if not self._data["session_id"]:
+            self._data.clear() # may have expired. In that case, check that the session is empty.
             self._data["session_id"] = self._generate_session_id()
 
             if self._initializer:
@@ -246,45 +272,44 @@ class CookieLessCompatibleSession(object):
                     self._initializer()
 
         self._data["ip"] = web.ctx.ip
+        self._data["cookieless"] = cookieless
+        self._origdata.update(deepcopy(self._data.__dict__))
 
     def _check_expiry(self):
         # check for expiry
         if self._data["session_id"] and self._data["session_id"] not in self.store:
-            if self._config.ignore_expiry:
-                self._data["session_id"] = None
-            else:
-                return self.expired()
+            self._data["session_id"] = None
 
     def _validate_ip(self):
         # check for change of IP
         if self._data["session_id"] and self.get('ip', None) != web.ctx.ip:
             if not self._config.ignore_change_ip or self._data["cookieless"] is True:
-                return self.expired()
-
-    def _save_cookieless(self):
-        if not self._data.get('_killed') and self._data["session_id"] is not None:
-            self.store[self._data["session_id"]] = dict(self._data)
-
-    def _save_cookie(self):
-        if not self.get('_killed'):
-            self._setcookie(self._data["session_id"])
-            self.store[self._data["session_id"]] = dict(self._data)
-        else:
-            self._setcookie(self._data["session_id"], expires=-1)
+                self._data["session_id"] = None
 
     def save(self):
-        if self._data.get("cookieless", False):
-            self._save_cookieless()
-        else:
-            self._save_cookie()
+        cookieless = self._data.get("cookieless", False)
+        if not self._data.get('_killed'):
+            if self._needs_store_update():
+                self.store[self._data["session_id"]] = dict(self._data)
+            if not cookieless:
+                self._setcookie(self._data["session_id"])
+        elif not cookieless:
+            self._setcookie(self._data["session_id"], expires=-1)
 
-    def _setcookie(self, session_id, expires='', **kw):
+    def _needs_store_update(self):
+        """ Returns whether the data in the session have changed. Prevents (most of the) race conditions """
+        return self._data.__dict__ != self._origdata.__dict__
+
+    def _setcookie(self, session_id, expires=None, **kw):
         cookie_name = self._config.cookie_name
         cookie_domain = self._config.cookie_domain
         cookie_path = self._config.cookie_path
         httponly = self._config.httponly
         secure = self._config.secure
-        web.setcookie(cookie_name, session_id, expires=expires, domain=cookie_domain, httponly=httponly, secure=secure, path=cookie_path)
+        samesite = self._config.samesite
+        if expires is None:
+            expires = self._config.timeout
+        web.setcookie(cookie_name, session_id, expires=expires, domain=cookie_domain, httponly=httponly, secure=secure, path=cookie_path, samesite=samesite)
 
     def _generate_session_id(self):
         """Generate a random id for session"""
