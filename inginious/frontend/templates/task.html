@@ -353,6 +353,7 @@ $else:
         <input type="hidden" name="@random_$i" id="random_input" value="$elem"/>
         $ i = i+1
     <input type="hidden" name="@action" value="submit"/>
+    <input type="hidden" name="@debug-mode" id="task-debug-mode" value=""/>
     $for key, problem in enumerate(task.get_problems()):
         <div class="problem card card-default mb-4">
             $if len(task.get_problems()) != 1 or problem.get_name(user_manager.session_language()) != "":
@@ -377,7 +378,6 @@ $else:
             <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">$:_("Please enroll in the course to submit.")</button>
         $elif groups_ok and tokens_ok:
             $if user_manager.has_admin_rights_on_course(course):
-                <input type="hidden" name="@debug-mode" id="task-debug-mode" value=""/>
                 <div class="row task_submit">
                     <div class="col-xs-9 col-md-10">
                         <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">$:_("Submit")</button>
