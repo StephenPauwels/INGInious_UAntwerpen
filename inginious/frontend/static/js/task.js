@@ -14,11 +14,13 @@ function init_task_page(evaluate)
         submitTask(false);
         return false;
     });
-
-    //Init the button that start a remote ssh server for debugging
-    $('form#task #task-submit-debug').on('click', function() {
+    $(".task-submit-debug").on('click', function() {
         submitTask(true);
     });
+    //Init the button that start a remote ssh server for debugging
+    // $('form#task #task-submit-debug').on('click', function() {
+    //     submitTask(true);
+    // });
 
     //if INGInious tells us to wait for another submission
     //this takes precedence over the link in the URL, in order to be consistent.
