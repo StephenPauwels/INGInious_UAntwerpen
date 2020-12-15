@@ -2,7 +2,12 @@
 #
 # This file is part of INGInious. See the LICENSE and the COPYRIGHTS files for
 # more information about the licensing of this file.
-from inginious.common.exceptions import InvalidTocException
+from collections import namedtuple
+
+SectionConfigItem = namedtuple('SectionConfigItem', ['label', 'type', 'default'])
+
+class InvalidTocException(Exception):
+    pass
 
 
 class SectionsList(object):
@@ -78,6 +83,7 @@ class Section(object):
             self._title = structure["title"]
         else:
             raise InvalidTocException(_("No title for one section"))
+        self._config = structure["config"] if "config" in structure else {}
 
     def get_id(self):
         """
@@ -90,6 +96,12 @@ class Section(object):
         :return: the title of this section
         """
         return self._title
+
+    def get_config(self):
+        """
+        :return: the config dict of this section
+        """
+        return self._config
 
 
 class NonTerminalSection(Section):
@@ -195,16 +207,7 @@ def check_toc(toc):
     :return: (True, "Valid TOC") if the toc has a valid format and (False, The error message) otherwise
     """
     try:
-        for section in toc:
-            if "id" not in section:
-                return False, "No id for section"
-            if "rank" not in section:
-                return False, "No rank for section"
-            if "title" not in section:
-                return False, "No title for section"
-
-            if "sections_list" not in section and "tasks_list" not in section:
-                return False, "Section don't contain a sections list nor a tasks list"
-    except:
-        return False, "Invalid TOC"
+        result = SectionsList(toc)
+    except Exception as ex:
+        return False, str(ex)
     return True, "Valid TOC"

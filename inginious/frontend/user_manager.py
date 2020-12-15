@@ -481,17 +481,16 @@ class UserManager:
                 }}
             ]))
 
-        student_visible_taskids = [taskid for taskid, task in tasks.items() if task.get_accessible_time().after_start()]
-        course_staff = course.get_staff()
-
         if usernames is None:
             usernames = self.get_course_registered_users(course=course, with_admins=False)
 
         retval = {username: {"task_succeeded": 0, "task_grades": [], "grade": 0} for username in usernames}
 
+        users_tasks_list = course.get_task_dispenser().get_user_task_list(usernames)
+
         for result in data:
             username = result["_id"]
-            visible_tasks = student_visible_taskids if username not in course_staff else taskids
+            visible_tasks = users_tasks_list[username]
             result["task_succeeded"] = len(set(result["task_succeeded"]).intersection(visible_tasks))
             result["task_grades"] = {dg["taskid"]: dg["grade"] for dg in result["task_grades"] if
                                      dg["taskid"] in visible_tasks}
@@ -607,7 +606,7 @@ class UserManager:
                     }})
 
     def task_is_visible_by_user(self, task, username=None, lti=None):
-        """ Returns true if the task is visible by the user
+        """ Returns true if the task is visible and can be accessed by the user
         :param lti: indicates if the user is currently in a LTI session or not.
             - None to ignore the check
             - True to indicate the user is in a LTI session
@@ -617,9 +616,10 @@ class UserManager:
         if username is None:
             username = self.session_username()
 
-        return (self.course_is_open_to_user(task.get_course(), username,
-                                            lti) and task.get_accessible_time().after_start()) or \
-               self.has_staff_rights_on_course(task.get_course(), username)
+        course = task.get_course()
+        dispenser_filter = course.get_task_dispenser().filter_accessibility(task.get_id(), username)
+        return (self.course_is_open_to_user(course, username, lti) and dispenser_filter) \
+               or self.has_staff_rights_on_course(task.get_course(), username)
 
     def task_can_user_submit(self, task, username=None, only_check=None, lti=None):
         """ returns true if the user can submit his work for this task
