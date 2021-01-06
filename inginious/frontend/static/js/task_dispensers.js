@@ -49,6 +49,7 @@ function dispenser_util_create_section(parent) {
     const level = Number(parent.attr("data-level"));
 
     const section = $("#empty_section").clone().show().appendTo(parent.children(".content"));
+    parent.children(".config").removeClass("bg-light");
     warn_before_exit = true;
     section.attr("data-level", level + 1);
 
@@ -368,7 +369,10 @@ function dispenser_util_get_sections_list(element) {
 function dispenser_util_get_section_config(element) {
     const config_list = {};
     element.find(".section-config-item").each(function (index) {
-        config_list[this.id] = this.value;
+        if($(this).attr("type") == "checkbox")
+            config_list[this.id] =$(this).is(":checked");
+        else
+            config_list[this.id] = this.value;
     });
     return config_list;
 }
