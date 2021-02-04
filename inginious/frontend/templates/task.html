@@ -44,7 +44,7 @@
                         {{ _("Not yet attempted") }}
                     {% elif eval_submission is not none and eval_submission["status"] == "done" and eval_submission["result"] == "success" %}
                         {{ _("Succeeded") }}
-                    {% elif eval_submission is not None and eval_submission["status"] == "done" and eval_submission["result"] == "open" %}
+                    {% elif eval_submission is not none and eval_submission["status"] == "done" and eval_submission["result"] == "open" %}
                         {{ _("Open") }}
                     {% else %}
                         {% set ns = namespace(waiting=False) %}
