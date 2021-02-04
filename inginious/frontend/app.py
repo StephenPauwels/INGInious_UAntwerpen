@@ -208,9 +208,9 @@ def get_app(config):
         template_helper = TemplateHelper(PluginManager(), None,
                                          'frontend/templates',
                                          'frontend/templates/layout',
-                                         'frontend/templates/layout_lti',
                                          config.get('use_minified_js', True))
         template_helper.add_to_template_globals("get_homepath", appli.get_homepath)
+        template_helper.add_to_template_globals("available_languages", available_languages)
         template_helper.add_to_template_globals("_", _)
         appli.template_helper = template_helper
         appli.init_mapping(urls_maintenance)
@@ -261,7 +261,6 @@ def get_app(config):
 
     template_helper = TemplateHelper(plugin_manager, user_manager, 'frontend/templates',
                                      'frontend/templates/layout',
-                                     'frontend/templates/layout_lti',
                                      config.get('use_minified_js', True))
 
     register_utils(database, user_manager, template_helper)
@@ -297,14 +296,14 @@ def get_app(config):
                                                                                  plugin_manager, user_manager))
 
     # Not found page
-    appli.notfound = lambda message='Page not found': web.notfound(template_helper.get_renderer().notfound(message))
+    appli.notfound = lambda message='Page not found': web.notfound(template_helper.render("notfound.html", message=message))
 
     # Forbidden page
-    appli.forbidden = lambda message='Forbidden': web.forbidden(template_helper.get_renderer().forbidden(message))
+    appli.forbidden = lambda message='Forbidden': web.forbidden(template_helper.render("forbidden.html", message=message))
 
     # Enable stacktrace display if needed
     web_debug = config.get('web_debug', False)
-    appli.internalerror = internalerror_generator(template_helper.get_renderer(False))
+    appli.internalerror = internalerror_generator(template_helper.render)
     if web_debug is True:
         web.config.debug = True
         appli.internalerror = debugerror
