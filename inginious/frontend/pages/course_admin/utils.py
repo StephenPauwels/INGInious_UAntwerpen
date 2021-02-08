@@ -344,7 +344,7 @@ def get_menu(course, current, renderer, plugin_manager, user_manager):
     if user_manager.has_admin_rights_on_course(course):
         default_entries += [("settings", "<i class='fa fa-cog fa-fw'></i>&nbsp; " + _("Course settings"))]
 
-    default_entries += [("stats", "<i class='fa fa-area-chart fa-fw'></i>&nbsp; " + _("Stats")),
+    default_entries += [("stats", "<i class='fa fa-area-chart fa-fw'></i>&nbsp; " + _("Statistics")),
                         ("students", "<i class='fa fa-user fa-fw'></i>&nbsp; " + _("Users management"))]
 
     if user_manager.has_admin_rights_on_course(course):
@@ -359,7 +359,8 @@ def get_menu(course, current, renderer, plugin_manager, user_manager):
     # Hook should return a tuple (link,name) where link is the relative link from the index of the course administration.
     additional_entries = [entry for entry in plugin_manager.call_hook('course_admin_menu', course=course) if entry is not None]
 
-    return renderer.course_admin.menu(course, default_entries + additional_entries, current)
+    return renderer("course_admin/menu.html", course=course,
+                    entries=default_entries + additional_entries, current=current)
 
 
 class CourseRedirect(INGIniousAdminPage):

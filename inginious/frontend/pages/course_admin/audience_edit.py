@@ -49,9 +49,9 @@ class CourseEditAudience(INGIniousAdminPage):
             raise self.app.notfound(message=_("This audience doesn't exist."))
 
         student_list, tutor_list, other_students, users_info = self.get_user_lists(course, audienceid)
-        return self.template_helper.get_renderer().course_admin.audience_edit(course, student_list, tutor_list,
-                                                                                   other_students, users_info,
-                                                                                   audience, msg, error)
+        return self.template_helper.render("course_admin/audience_edit.html", course=course, student_list=student_list,
+                                           tutor_list=tutor_list,other_students=other_students, users_info=users_info,
+                                           audience=audience, msg=msg, error=error)
 
     def GET_AUTH(self, courseid, audienceid):  # pylint: disable=arguments-differ
         """ Edit a audience """
@@ -88,6 +88,16 @@ class CourseEditAudience(INGIniousAdminPage):
                 raise web.seeother(self.app.get_homepath() + "/admin/" + courseid + "/students?audiences")
         else:
             audiences_dict = json.loads(data["audiences"])
+            student_list = self.user_manager.get_course_registered_users(course, False)
+            for username in audiences_dict[0]["students"]:
+                userdata = self.database.users.find_one({"username": username})
+                if userdata is None:
+                    msg = _("User not found : {}".format(username))
+                    error = True
+                    # Display the page
+                    return self.display_page(course, audienceid, msg, error)
+                elif username not in student_list:
+                    self.user_manager.course_register_user(course, username)
             self.database.audiences.update_one(
                 {"_id": ObjectId(audiences_dict[0]["_id"])},
                 {"$set": {"students": audiences_dict[0]["students"],
