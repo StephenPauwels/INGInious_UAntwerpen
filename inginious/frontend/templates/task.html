@@ -414,16 +414,16 @@
             <button type="submit" class="btn btn-default btn-lg btn-block center-block" disabled="disabled">{{ _("Please enroll in the course to submit.") }}</button>
         {% elif groups_ok and tokens_ok %}
             {% if user_manager.has_admin_rights_on_course(course) %}
-                <input type="hidden" name="@debug-mode" id="task-debug-mode" value=""/>
                 <div class="row task_submit">
                     <div class="col-xs-9 col-md-10">
                         <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">{{ _("Submit") }}</button>
                     </div>
                     <div class="col-xs-3 col-md-2">
-                        <button type="button" class="btn btn-info btn-lg btn-block center-block" id="task-submit-debug" data-toggle="tooltip"
+                        <button type="button" class="btn btn-info btn-lg btn-block center-block task-submit-debug" id="task-submit-debug-{{ loop.index }}" data-toggle="tooltip"
                                 data-placement="top" title="{{ _('Start remote SSH console with this input') }}">
                             <i class="fa fa-terminal"></i>
                         </button>
+                    </button>
                     </div>
                 </div>
             {% else %}

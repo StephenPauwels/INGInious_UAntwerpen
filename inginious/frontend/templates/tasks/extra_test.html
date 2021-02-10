@@ -1,8 +1,6 @@
-$def with (inputId,header,lines,maxChars,language,optional,default)
+{# This file is part of INGInious. See the LICENSE and the COPYRIGHTS files for #}
+{# more information about the licensing of this file. #}
 
-$#
-$# This file is part of INGInious. See the LICENSE and the COPYRIGHTS files for
-$# more information about the licensing of this file.
-$#
-<div id="task_alert_$inputId" class="task_alert_problem"></div>
-$:header
+<div id="task_alert_{{inputId}}" class="task_alert_problem"></div>
+
+{{ header | safe }}

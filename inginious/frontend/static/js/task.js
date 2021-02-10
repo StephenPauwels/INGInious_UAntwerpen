@@ -14,10 +14,11 @@ function init_task_page(evaluate)
         submitTask(false);
         return false;
     });
+
     $(".task-submit-debug").on('click', function() {
         submitTask(true);
     });
-    //Init the button that start a remote ssh server for debugging
+    // Init the button that start a remote ssh server for debugging
     // $('form#task #task-submit-debug').on('click', function() {
     //     submitTask(true);
     // });
