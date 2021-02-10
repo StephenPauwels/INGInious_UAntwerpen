@@ -61,15 +61,15 @@
         </div>
         <div id="edit_task_tabs_content" class="tab-content">
             <div role="tabpanel" class="card-body tab-pane active" id="tab_basic">
-                {{ include.course_admin.edit_tabs.basic(course,task_data,available_filetypes,AccessibleTime,current_filetype,contains_is_html) | safe }}
+                {% include "course_admin/edit_tabs/basic.html" %}
             </div>
 
             <div role="tabpanel" class="card-body tab-pane" id="tab_environment">
-                {{ include.course_admin.edit_tabs.environment(task_data,environment_types,environments,contains_is_html) | safe }}
+                {% include "course_admin/edit_tabs/environment.html" %}
             </div>
 
             <div role="tabpanel" class="card-body tab-pane" id="tab_subproblems">
-                {{ include.course_admin.edit_tabs.subproblems(problem_types) | safe }}
+                {% include "course_admin/edit_tabs/subproblems.html" %}
             </div>
 
             <div role="tabpanel" class="card-body tab-pane" id="tab_files">
@@ -81,7 +81,9 @@
                     </li>
                 </ul>
                 <div id="edit_file_tabs_content" class="tab-content">
-                    {{ include.course_admin.edit_tabs.files(course,taskid,file_list,None) | safe }}
+                    {% with error=None %}
+                        {% include "course_admin/edit_tabs/files.html" %}
+                    {% endwith %}
                 </div>
             </div>
 
@@ -159,7 +161,7 @@
     {% endfor %}
 </div>
 
-{{ include.course_admin.edit_tabs.file_modals() | safe }}
+{% include "course_admin/edit_tabs/file_modals.html" %}
 
 <!-- Init the javascript for the subproblem tab -->
 <script type="text/javascript">
