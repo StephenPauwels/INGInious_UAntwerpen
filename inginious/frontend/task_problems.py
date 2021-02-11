@@ -28,11 +28,6 @@ class DisplayableProblem(Problem, metaclass=ABCMeta):
         """ Adapt the input from web.py for the inginious.backend """
         return input_data
 
-    @classmethod
-    def get_renderer(cls, template_helper):
-        """ Get the renderer for this class problem """
-        return template_helper.get_renderer(False)
-
     @abstractmethod
     def show_input(self, template_helper, language, seed):
         """ get the html for this problem """
@@ -73,7 +68,7 @@ class DisplayableCodeProblem(CodeProblem, DisplayableProblem):
 
     @classmethod
     def show_editbox(cls, template_helper, key, language):
-        return DisplayableCodeProblem.get_renderer(template_helper).course_admin.subproblems.code(key, True)
+        return template_helper.render("course_admin/subproblems/code.html", key=key, multiline=True)
 
     @classmethod
     def show_editbox_templates(cls, template_helper, key, language):
@@ -102,7 +97,7 @@ class DisplayableCodeSingleLineProblem(CodeSingleLineProblem, DisplayableProblem
 
     @classmethod
     def show_editbox(cls, template_helper, key, language):
-        return DisplayableCodeSingleLineProblem.get_renderer(template_helper).course_admin.subproblems.code(key, False)
+        return template_helper.render("course_admin/subproblems/code.html", key=key, multiline=False)
 
     @classmethod
     def show_editbox_templates(cls, template_helper, key, language):
@@ -129,7 +124,7 @@ class DisplayableFileProblem(FileProblem, DisplayableProblem):
 
     @classmethod
     def show_editbox(cls, template_helper, key, language):
-        return DisplayableFileProblem.get_renderer(template_helper).course_admin.subproblems.file(key)
+        return template_helper.render("course_admin/subproblems/file.html", key=key)
 
     def show_input(self, template_helper, language, seed):
         """ Show FileBox """
@@ -206,11 +201,11 @@ class DisplayableMultipleChoiceProblem(MultipleChoiceProblem, DisplayableProblem
 
     @classmethod
     def show_editbox(cls, template_helper, key, language):
-        return DisplayableMultipleChoiceProblem.get_renderer(template_helper).course_admin.subproblems.multiple_choice(key)
+        return template_helper.render("course_admin/subproblems/multiple_choice.html", key=key)
 
     @classmethod
     def show_editbox_templates(cls, template_helper, key, language):
-        return DisplayableMultipleChoiceProblem.get_renderer(template_helper).course_admin.subproblems.multiple_choice_templates(key)
+        return template_helper.render("course_admin/subproblems/multiple_choice_templates.html", key=key)
 
 
 class DisplayableMatchProblem(MatchProblem, DisplayableProblem):
@@ -231,7 +226,7 @@ class DisplayableMatchProblem(MatchProblem, DisplayableProblem):
 
     @classmethod
     def show_editbox(cls, template_helper, key, language):
-        return DisplayableMatchProblem.get_renderer(template_helper).course_admin.subproblems.match(key)
+        return template_helper.render("course_admin/subproblems/match.html", key=key)
 
     @classmethod
     def show_editbox_templates(cls, template_helper, key, language):
