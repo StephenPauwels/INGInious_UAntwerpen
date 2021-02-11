@@ -252,7 +252,7 @@ class DisplayableTestProblem(TestProblem, DisplayableProblem):
 
     @classmethod
     def show_editbox(cls, template_helper, key, language):
-        return DisplayableTestProblem.get_renderer(template_helper).course_admin.subproblems.extra_test(key)
+        return template_helper.render("course_admin/subproblems/extra_test.html", key=key)
 
     @classmethod
     def show_editbox_templates(cls, template_helper, key, language):
