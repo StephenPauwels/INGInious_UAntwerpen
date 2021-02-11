@@ -427,10 +427,6 @@ function studio_init_template_code_single_line(well, pid, problem)
     studio_init_template_code(well, pid, problem);
 }
 
-function studio_init_template_extra_test(well, pid, problem)
-{
-
-}
 
 /**
  * Init a file template
