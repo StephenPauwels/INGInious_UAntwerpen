@@ -11,7 +11,7 @@ from abc import ABCMeta, abstractmethod
 from random import Random
 
 from inginious.common.tasks_problems import Problem, CodeProblem, CodeSingleLineProblem, \
-    MatchProblem, MultipleChoiceProblem, FileProblem, TestProblem
+    MatchProblem, MultipleChoiceProblem, FileProblem
 
 from inginious.frontend.parsable_text import ParsableText
 
@@ -227,32 +227,6 @@ class DisplayableMatchProblem(MatchProblem, DisplayableProblem):
     @classmethod
     def show_editbox(cls, template_helper, key, language):
         return template_helper.render("course_admin/subproblems/match.html", key=key)
-
-    @classmethod
-    def show_editbox_templates(cls, template_helper, key, language):
-        return ""
-
-
-class DisplayableTestProblem(TestProblem, DisplayableProblem):
-    """ A displayable match problem """
-
-    def __init__(self, problemid, content, translations, taskfs):
-        super(DisplayableTestProblem, self).__init__(problemid, content, translations, taskfs)
-
-    @classmethod
-    def get_type_name(cls, language):
-        return _("extra_test")
-
-    def show_input(self, template_helper, language, seed):
-        """ Show MatchProblem """
-        header = ParsableText(self.gettext(language, self._header), "rst",
-                              translation=self.get_translation_obj(language))
-        # return str(DisplayableCodeProblem.get_renderer(template_helper).tasks.extra_test(self.get_id(), header, 8, 0, None, True, None))
-        return template_helper.render("tasks/extra_test.html", pid=self.get_id(), header=header)
-
-    @classmethod
-    def show_editbox(cls, template_helper, key, language):
-        return template_helper.render("course_admin/subproblems/extra_test.html", key=key)
 
     @classmethod
     def show_editbox_templates(cls, template_helper, key, language):

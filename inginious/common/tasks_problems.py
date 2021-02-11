@@ -397,33 +397,4 @@ class MatchProblem(Problem):
         return fields
 
 
-class TestProblem(Problem):
-    """Add a different test set, using code from another problem"""
 
-    def __init__(self, problemid, content, translations, taskfs):
-        super(TestProblem, self).__init__(problemid, content, translations, taskfs)
-        self._header = content['header'] if "header" in content else ""
-        self._optional = True
-
-    @classmethod
-    def get_type(cls):
-        return "extra_test"
-
-    def input_is_consistent(self, task_input, default_allowed_extension, default_max_size):
-        return True
-
-    def input_type(self):
-        return None
-
-    def check_answer(self, _, __):
-        return None, None, None, 0, ""
-
-    @classmethod
-    def parse_problem(self, problem_content):
-        return Problem.parse_problem(problem_content)
-
-    @classmethod
-    def get_text_fields(cls):
-        fields = Problem.get_text_fields()
-        fields.update({"header": True})
-        return fields
