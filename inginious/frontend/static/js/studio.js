@@ -7,14 +7,22 @@
 /**
  * Load the studio, creating blocks for existing subproblems
  */
-function studio_load(data)
+function studio_load(data, keys)
 {
-    jQuery.each(data, function(pid, problem)
+    jQuery.each(keys, function(key, pid)
     {
+        var problem = data[pid];
         var template = "#subproblem_" + problem["type"];
         studio_create_from_template(template, pid);
         studio_init_template(pid, problem);
     });
+
+    // jQuery.each(data, function(pid, problem)
+    // {
+    //     var template = "#subproblem_" + problem["type"];
+    //     studio_create_from_template(template, pid);
+    //     studio_init_template(pid, problem);
+    // });
 
     // Hacky fix for codemirror in collapsable elements
     var collapsable = $('#tab_subproblems').find('.collapse');
