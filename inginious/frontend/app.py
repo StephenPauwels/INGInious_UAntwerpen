@@ -9,6 +9,7 @@ import os
 import sys
 import flask
 import pymongo
+import oauthlib
 
 from gridfs import GridFS
 from binascii import hexlify
@@ -79,6 +80,7 @@ def _put_configuration_defaults(config):
             config['session_parameters'][k] = v
 
     # flask migration
+    config["DEBUG"] = config.get("web_debug", False)
     config["SESSION_COOKIE_NAME"] = "inginious_session_id"
     config["SESSION_USE_SIGNER"] = True
     config["PERMANENT_SESSION_LIFETIME"] = config['session_parameters']["timeout"]
@@ -88,7 +90,8 @@ def _put_configuration_defaults(config):
     if smtp_conf is not None:
         config["MAIL_SERVER"] = smtp_conf["host"]
         config["MAIL_PORT"] = int(smtp_conf["port"])
-        config["MAIL_USE_TLS"]: bool(smtp_conf.get("starttls", False))
+        config["MAIL_USE_TLS"] = bool(smtp_conf.get("starttls", False))
+        config["MAIL_USE_SSL"] = bool(smtp_conf.get("usessl", False))
         config["MAIL_USERNAME"] = smtp_conf.get("username", None)
         config["MAIL_PASSWORD"] = smtp_conf.get("password", None)
         config["MAIL_DEFAULT_SENDER"] = smtp_conf.get("sendername", "no-reply@ingnious.org")
@@ -265,17 +268,14 @@ def get_app(config):
         return template_helper.render("forbidden.html", message=e.description), 403
     flask_app.register_error_handler(403, flask_forbidden)
 
-    # Enable stacktrace display if needed
+    # Enable debug mode if needed
     web_debug = config.get('web_debug', False)
+    flask_app.debug = web_debug
+    oauthlib.set_debug(web_debug)
 
     def flask_internalerror(e):
         return template_helper.render("internalerror.html", message=e.description), 500
     flask_app.register_error_handler(InternalServerError, flask_internalerror)
-
-    if web_debug is True:
-        flask_app.debug = True
-    elif isinstance(web_debug, str):
-        flask_app.debug = False
 
     # Insert the needed singletons into the application, to allow pages to call them
     flask_app.get_homepath = get_homepath
