@@ -13,7 +13,7 @@
         name="{{inputId}}"
         data-max-size="{{max_size}}"
         data-allowed-exts="{{ json(allowed_exts) }}"
-        data-optional="{{optional}}"
+        data-optional="{% if optional %}{{True}}{% else %}{{False}}{% endif %}"
         /><br/>
 
 <object id="download-input-file-pdf-{{inputId}}" data="" type="application/pdf" style="display:none; width: 100%; min-height: 800px;">
