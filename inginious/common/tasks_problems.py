@@ -187,7 +187,7 @@ class FileProblem(Problem):
 
     def input_is_consistent(self, task_input, default_allowed_extension, default_max_size):
         if not str(self.get_id()) in task_input:
-                return False
+            return False
         try:
             if len(task_input[self.get_id()]) == 0 and self._optional:
                 return True

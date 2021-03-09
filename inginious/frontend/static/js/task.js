@@ -251,7 +251,7 @@ function taskFormValid()
         //file input fields cannot be optional
         if(filename == "")
         {
-            if ($(this).attr('data-optional') != "True") {
+            if ($(this).attr('data-optional') != "on") {
                 answered_to_all = false;
                 return;
             }
