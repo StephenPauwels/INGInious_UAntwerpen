@@ -389,6 +389,7 @@
     <input type="hidden" name="@action" value="submit"/>
     <input type="hidden" name="@debug-mode" id="task-debug-mode" value=""/>
     {% for problem in task.get_problems() %}
+        <a id="task_box_{{ problem.get_id() }}"></a>
         <div class="problem card card-default mb-4">
             {% if task.get_problems()|length != 1 or problem.get_name(user_manager.session_language()) != "" %}
                 <div class="card-heading">
@@ -416,7 +417,7 @@
             {% if user_manager.has_admin_rights_on_course(course) %}
                 <div class="row task_submit">
                     <div class="col-xs-9 col-md-10">
-                        <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit">{{ _("Submit") }}</button>
+                        <button type="submit" class="btn btn-default btn-lg btn-block center-block" id="task-submit" data-exercise={{ problem.get_id() }}>{{ _("Submit") }}</button>
                     </div>
                     <div class="col-xs-3 col-md-2">
                         <button type="button" class="btn btn-info btn-lg btn-block center-block task-submit-debug" id="task-submit-debug-{{ loop.index }}" data-toggle="tooltip"

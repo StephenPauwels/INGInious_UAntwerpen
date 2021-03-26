@@ -10,7 +10,8 @@ function init_task_page(evaluate)
 
     //Init the task form, if we are on the task submission page
     var task_form = $('form#task');
-    task_form.on('submit', function() {
+    task_form.on('submit', function(e) {
+        // var problem_id = e.originalEvent.submitter.getAttribute("data-exercise");
         submitTask(false);
         return false;
     });
@@ -304,7 +305,7 @@ function taskFormValid()
         });
         task_alert.html(getAlertCode("Error", content.html(), "danger", false));
         $('html, body').animate({
-            scrollTop: task_alert.offset().top - 100
+            // scrollTop: task_alert.offset().top - 100
         }, 200);
         return false;
     }
@@ -364,7 +365,7 @@ function submitTask(with_ssh)
     displayTaskLoadingAlert(null, null);
     updateTaskStatus("<i class=\"fa fa-spinner fa-pulse fa-fw\" aria-hidden=\"true\"></i>", 0);
     $('html, body').animate({
-        scrollTop: $('#task_alert').offset().top - 100
+        // scrollTop: $('#task_alert').offset().top - 100
     }, 200);
 }
 
@@ -549,7 +550,7 @@ function displayTaskInputLoadingAlert()
     task_alert.html(getAlertCode("<i class=\"fa fa-spinner fa-pulse fa-fw\" aria-hidden=\"true\"></i>", "", "info", false));
     $('html, body').animate(
         {
-            scrollTop: task_alert.offset().top - 100
+            // scrollTop: task_alert.offset().top - 100
         }, 200);
 }
 
@@ -560,7 +561,7 @@ function displayTaskInputErrorAlert()
     task_alert.html(getAlertCode("<b>" + $("#internalerror").text() + "</b>", "", "danger", false));
     $('html, body').animate(
         {
-            scrollTop: task_alert.offset().top - 100
+            // scrollTop: task_alert.offset().top - 100
         }, 200);
 }
 
@@ -588,7 +589,7 @@ function displayTaskStudentAlertWithProblems(content, type)
 
     $('html, body').animate(
     {
-        scrollTop: firstPos - 100
+        // scrollTop: firstPos - 100
     }, 200);
 
     colorizeStaticCode();

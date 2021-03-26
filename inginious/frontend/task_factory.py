@@ -31,6 +31,8 @@ class TaskFactory(object):
         :param problem_type: Problem class
         """
         self._task_problem_types.update({problem_type.get_type(): problem_type})
+        print("Add task")
+        print(self._task_problem_types)
 
     def get_task(self, course, taskid):
         """
