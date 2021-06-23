@@ -22,19 +22,7 @@ sys.path.insert(1, os.path.abspath('../base-containers/base/'))
 import inginious
 import sphinx_rtd_theme
 
-import sys
-from mock import Mock as MagicMock
-
-
-class Mock(MagicMock):
-    @classmethod
-    def __getattr__(cls, name):
-        return Mock()
-
-MOCK_MODULES = ['cgutils', 'simpleldap', 'tidylib']
-sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
-
-
+autodoc_mock_imports = ['cgutils', 'ldap3', 'tidylib', 'onelogin']
 
 # -- General configuration ------------------------------------------------
 
@@ -65,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'INGInious'
-copyright = '2014-2019, the INGInious authors'
+copyright = '2014-2021, Université catholique de Louvain'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -125,7 +113,9 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-#html_theme_options = {}
+html_theme_options = {
+    "logo_only": True
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -139,7 +129,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-#html_logo = None
+html_logo = "logo_rtd.svg"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32

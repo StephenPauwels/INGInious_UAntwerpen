@@ -9,7 +9,7 @@ Configuration reference
 Configuring INGInious is done via a file named ``configuration.yaml``.
 To get started, a file named ``configuration.example.yaml`` is provided.
 
-.. literalinclude:: ../../configuration.example.yaml
+.. literalinclude:: ../../../configuration.example.yaml
     :language: yaml
     :linenos:
 
@@ -126,7 +126,7 @@ The different entries are :
 
 ``webterm``
     Link to the INGInious xterm app with the following syntax: ``http[s]://host:port``.
-    If set, it allows to use in-browser task debug via ssh. (See :ref:`_webterm_setup` for
+    If set, it allows to use in-browser task debug via ssh. (See :ref:`webterm_setup` for
     more information)
 
 ``webdav_host``
@@ -160,6 +160,19 @@ The different entries are :
     Most value are as defined in standard HTTP cookies. The ``secret_key`` should be a long sequence of random characters.
     ``ignore_change_ip`` indicates whether users that change IP should be disconnected or not. This may prevent cookie
     stealing partly.
+
+``reverse-proxy-config``
+    A dictionary for reverse proxy configuration.
+
+    ``enable``
+        ``false`` if INGInious is not running benind a reverse proxy, ``true`` otherwise. Its default value is ``false``
+        
+    ``x_for``
+        Number of values to trust for X-Forwarded-For. Its default value is 1
+
+    ``x_host``
+        Number of values to trust for X-Forwarded-Host. Its default value is 1
+
 
 .. _configuration.example.yaml: https://github.com/UCL-INGI/INGInious/blob/master/configuration.example.yaml
 .. _docker-py API: https://github.com/docker/docker-py/blob/master/docs/api.md#client-api
@@ -355,6 +368,19 @@ To enable the plugin, add to your configuration file:
 A new configuration page named *Contest* appears on the administration page. To enable the contest mode, check the
 *Enable contest plugin* box on the appropriate course. Please note that the plugin will override the task
 accessibility dates.
+
+
+Upcoming tasks plugin
+`````````````````````
+
+This plugin allows for students to easily visualize their upcoming tasks based on deadlines.
+The new page is available directly from the left main menu.
+
+To enable the plugin, add to your configuration file:
+::
+
+    plugins:
+        - plugin_module: inginious.frontend.plugins.upcoming_tasks
 
 Simple grader plugin
 ````````````````````
